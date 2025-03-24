@@ -1,0 +1,9 @@
+C:\Users\39800323\RiderProjects\ExcelParcer FCR\ExcelParcer FCR\bin\Debug\ExcelParcer_FCR.exe
+C:\Users\39800323\RiderProjects\ExcelParcer FCR\ExcelParcer FCR\bin\Debug\ExcelParcer_FCR.pdb
+C:\Users\39800323\RiderProjects\ExcelParcer FCR\ExcelParcer FCR\bin\Debug\EPPlus.dll
+C:\Users\39800323\RiderProjects\ExcelParcer FCR\ExcelParcer FCR\bin\Debug\EPPlus.xml
+C:\Users\39800323\RiderProjects\ExcelParcer FCR\ExcelParcer FCR\obj\Debug\ExcelParcer FCR.csproj.AssemblyReference.cache
+C:\Users\39800323\RiderProjects\ExcelParcer FCR\ExcelParcer FCR\obj\Debug\ExcelParcer FCR.csproj.CoreCompileInputs.cache
+C:\Users\39800323\RiderProjects\ExcelParcer FCR\ExcelParcer FCR\obj\Debug\ExcelPar.9176ED41.Up2Date
+C:\Users\39800323\RiderProjects\ExcelParcer FCR\ExcelParcer FCR\obj\Debug\ExcelParcer_FCR.exe
+C:\Users\39800323\RiderProjects\ExcelParcer FCR\ExcelParcer FCR\obj\Debug\ExcelParcer_FCR.pdb

@@ -1,0 +1,9 @@
+C:\Users\39800323\RiderProjects\FillExcel_CR\FillExcel_CR\bin\Debug\FillExcel_CR.exe
+C:\Users\39800323\RiderProjects\FillExcel_CR\FillExcel_CR\bin\Debug\FillExcel_CR.pdb
+C:\Users\39800323\RiderProjects\FillExcel_CR\FillExcel_CR\bin\Debug\EPPlus.dll
+C:\Users\39800323\RiderProjects\FillExcel_CR\FillExcel_CR\bin\Debug\EPPlus.xml
+C:\Users\39800323\RiderProjects\FillExcel_CR\FillExcel_CR\obj\Debug\FillExcel_CR.csproj.AssemblyReference.cache
+C:\Users\39800323\RiderProjects\FillExcel_CR\FillExcel_CR\obj\Debug\FillExcel_CR.csproj.CoreCompileInputs.cache
+C:\Users\39800323\RiderProjects\FillExcel_CR\FillExcel_CR\obj\Debug\FillExce.CFF099AA.Up2Date
+C:\Users\39800323\RiderProjects\FillExcel_CR\FillExcel_CR\obj\Debug\FillExcel_CR.exe
+C:\Users\39800323\RiderProjects\FillExcel_CR\FillExcel_CR\obj\Debug\FillExcel_CR.pdb

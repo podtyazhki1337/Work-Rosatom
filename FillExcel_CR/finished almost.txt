@@ -1,0 +1,811 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
+
+namespace ExcelWriterReverse
+{
+    class Program
+    {
+        static void Main()
+        {
+            Console.Write("Введите путь к существующему Excel файлу: ");
+            string filePath = Console.ReadLine();
+
+            if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
+            {
+                Console.WriteLine("Файл не найден или путь пустой. Завершение работы.");
+                return;
+            }
+
+            // Пример тестовых данных (заглушка)
+            var ecr = GetECRFromSQLStub();
+
+            // Пишем данные в Excel
+            WriteToExcel(filePath, ecr);
+
+            Console.WriteLine("\nДанные успешно записаны в файл: " + filePath);
+            Console.WriteLine("Нажмите любую клавишу для завершения...");
+            Console.ReadKey();
+        }
+
+        #region Пример тестовых данных
+        private static ChangeRequest GetECRFromSQLStub()
+        {
+            var ecr = new ChangeRequest
+            {
+                ChangeRequestNo = "SQL-CR-001",
+                ContractorChangeCoordinator = "SQL Coordinator",
+                InitiatorInternalCRNo = "SQL-Int-456",
+                ChangeInitiator = "Bob Initiator",
+                InitiatorOrganization = "SQL Org",
+                DocumentationType = "SQL-MLA",
+                Reason = "SQL Test Reason",
+                TechnicalSolutionDescription = "SQL Tech Solution",
+            };
+
+            // Добавим больше данных, чтобы проверить динамические вставки
+            for (int i = 1; i <= 5; i++)
+            {
+                ecr.SupportingDocuments.Add(new SupportingDocument
+                {
+                    Filename = $"SQL-Doc{i}.pdf",
+                    CodeTitleOrSummary = $"SQL Summary {i}"
+                });
+
+                ecr.InitiatorTDDImpacts.Add(new TDDImpact
+                {
+                    TDDCode = $"SQL-TDD-{i}00",
+                    Revision = $"Rev{i}",
+                    NewRevisionRequired = i % 2 == 0,
+                    TDDName = $"SQL TDD {i}",
+                    TDDState = "Active",
+                    ChangeDescription = $"SQL Change {i}",
+                    SafetyImpacts = new SafetyImpacts { NuclearSafety = i % 2 == 1 }
+                });
+
+                ecr.OtherTDDImpacts.Add(new TDDImpact
+                {
+                    EvaluationOrganization = $"SQL-EvalOrg{i}",
+                    TDDCode = $"SQL-OtherTDD-{i}00",
+                    Revision = $"Rev{i}X",
+                    NewRevisionRequired = i % 2 == 1,
+                    TDDName = $"SQL Other TDD {i}",
+                    TDDState = "Draft",
+                    ChangeDescription = $"SQL Other Change {i}",
+                    SafetyImpacts = new SafetyImpacts { Environmental = i % 2 == 0 }
+                });
+
+                ecr.AffectedSSCs.Add(new SSCImpact
+                {
+                    KKSCode = $"SQL-KKS-{i}00",
+                    SSCName = $"SQL SSC {i}",
+                    ChangeDescription = $"SQL SSC Change {i}"
+                });
+
+                ecr.Confirmations.Add(new Confirmation
+                {
+                    Organization = $"SQL-Org{i}",
+                    Position = $"SQL-Pos{i}",
+                    ResponsiblePerson = $"SQL-Person{i}",
+                    Date = $"2025-03-{i:D2}"
+                });
+
+                ecr.Approvals.Add(new Approval
+                {
+                    Position = $"SQL-ApprovalPos{i}",
+                    ResponsiblePerson = $"SQL-AppPerson{i}",
+                    Date = $"2025-04-{i:D2}"
+                });
+            }
+
+            ecr.Section24 = new Section24
+            {
+                FinalNSCCategory = "SQL-aa",
+                ImpactOnSafetyClasses = true,
+                ImpactOnDSA = true,
+                CRMethod = "SQL-Normal",
+                EngineeringComments = "SQL Eng Comment"
+            };
+
+            ecr.Section25 = new Section25
+            {
+                ContractAffected = true,
+                CostImpact = true,
+                ScheduleImpact = false,
+                NonTechnicalComments = "SQL Non-Tech Comment"
+            };
+
+            return ecr;
+        }
+        #endregion
+
+        #region Основной метод записи в Excel
+        private static void WriteToExcel(string filePath, ChangeRequest ecr)
+        {
+            FileInfo fi = new FileInfo(filePath);
+            using (ExcelPackage package = new ExcelPackage(fi))
+            {
+                ExcelWorksheet sheet = package.Workbook.Worksheets[1];
+                if (sheet == null)
+                {
+                    Console.WriteLine("Ошибка: не найден лист с индексом 1.");
+                    return;
+                }
+
+                int rows = sheet.Dimension.Rows;
+                int cols = sheet.Dimension.Columns;
+                Console.WriteLine("Лист [1] содержит {0} строк и {1} столбцов.", rows, cols);
+
+                // 1) Заполняем статические поля
+                for (int r = 1; r <= rows; r++)
+                {
+                    for (int c = 1; c <= cols; c++)
+                    {
+                        string cellTextRaw = GetCellText(sheet, r, c);
+                        if (IsNullOrWhiteSpace(cellTextRaw)) continue;
+                        string cellText = cellTextRaw.Replace("\r", "").Replace("\n", "").Trim();
+
+                        if (cellText.Contains("Change Request No:"))
+                            SetValueRight(sheet, r, c, cols, ecr.ChangeRequestNo);
+                        else if (cellText.Contains("Contractor Change Coordinator:"))
+                            SetValueRight(sheet, r, c, cols, ecr.ContractorChangeCoordinator);
+                        else if (cellText.Contains("Initiator's internal CR No:"))
+                            SetValueRight(sheet, r, c, cols, ecr.InitiatorInternalCRNo);
+                        else if (cellText.Contains("Change Initiator:"))
+                            SetValueRight(sheet, r, c, cols, ecr.ChangeInitiator);
+                        else if (cellText.Contains("Initiator's organization:"))
+                            SetValueRight(sheet, r, c, cols, ecr.InitiatorOrganization);
+                        else if (cellText.Contains("Type of documentation, where Engineering Change will be reflected"))
+                            SetValueRight(sheet, r, c, cols, ecr.DocumentationType);
+                        else if (cellText.Contains("Reason of Engineering Change:"))
+                            SetValueRight(sheet, r, c, cols, ecr.Reason);
+                        else if (cellText.Contains("description of technical solution"))
+                            SetValueRight(sheet, r, c, cols, ecr.TechnicalSolutionDescription);
+                        else if (cellText.Contains("Final NSC category of the Engineering Change:"))
+                            SetValueRight(sheet, r, c, cols, ecr.Section24.FinalNSCCategory);
+                        else if (cellText.Contains("Presence of direct or indirect impact on equipment of 1,2 and 3 safety classes"))
+                            SetValueRight(sheet, r, c, cols, ecr.Section24.ImpactOnSafetyClasses ? "Yes" : "No");
+                        else if (cellText.Contains("Presence the impact on the results DSA") || cellText.Contains("Наличие влияния на результаты ДАБ"))
+                            SetValueRight(sheet, r, c, cols, ecr.Section24.ImpactOnDSA ? "Yes" : "No");
+                        else if (cellText.Contains("Method* of CR:") || cellText.Contains("Вид ЗИ:"))
+                            SetValueFixedColumn(sheet, r, 15, ecr.Section24.CRMethod);
+                        else if (cellText.Contains("Comments for engineering evaluation:") || cellText.Contains("Комментарии к инженерной оценке:"))
+                            SetValueRight(sheet, r, c, cols, ecr.Section24.EngineeringComments);
+                        else if (cellText.Contains("Contract (its  presence indicates") || cellText.Contains("Контракт (его наличие указывает"))
+                            SetValueRight(sheet, r, c, cols, ecr.Section25.ContractAffected ? "Yes" : "No");
+                        else if (cellText.Contains("Cost impact:") || cellText.Contains("Влияние на стоимость:"))
+                            SetValueRight(sheet, r, c, cols, ecr.Section25.CostImpact ? "Yes" : "No");
+                        else if (cellText.Contains("Schedule:") || cellText.Contains("График:"))
+                            SetValueFixedColumn(sheet, r, 15, ecr.Section25.ScheduleImpact ? "Yes" : "No");
+                        else if (cellText.Contains("Comments for non-technical assessment:") || cellText.Contains("Комментарии к нетехнической оценке:"))
+                            SetValueRight(sheet, r, c, cols, ecr.Section25.NonTechnicalComments);
+                    }
+                }
+
+                // 2) Динамические разделы
+                // 1.2
+                int row12 = FindRowByPrefix(sheet, rows, "1.2");
+                if (row12 > 0)
+                {
+                    WriteSection12(sheet, row12 + 2, "2.1", ref rows, ecr.SupportingDocuments);
+                }
+
+                // 2.1
+                int row21 = FindRowByPrefix(sheet, rows, "2.1");
+                if (row21 > 0)
+                {
+                    WriteSection21(sheet, row21 + 2, "2.2", ref rows, ecr.InitiatorTDDImpacts);
+                }
+
+                // 2.2
+                int row22 = FindRowByPrefix(sheet, rows, "2.2");
+                if (row22 > 0)
+                {
+                    WriteSection22(sheet, row22 + 3, "2.3", ref rows, ecr.OtherTDDImpacts);
+                }
+
+                // 2.3
+                int row23 = FindRowByPrefix(sheet, rows, "2.3");
+                if (row23 > 0)
+                {
+                    WriteSection23(sheet, row23 + 2, "2.4", ref rows, ecr.AffectedSSCs);
+                }
+
+                // 3.
+                int row3 = FindRowByPrefix(sheet, rows, "3.");
+                if (row3 > 0)
+                {
+                    WriteSection3(sheet, row3 + 2, "4.", ref rows, ecr.Confirmations);
+                }
+
+                // 4.
+                int row4 = FindRowByPrefix(sheet, rows, "4.");
+                if (row4 > 0)
+                {
+                    WriteSection4(sheet, row4 + 2, ref rows, ecr.Approvals);
+                }
+
+                // Сохраним
+                package.Save();
+                Console.WriteLine("Файл сохранён принудительно.");
+            }
+        }
+        #endregion
+
+        #region Утилиты для чтения ячеек и записи статических полей
+
+        private static bool IsNullOrWhiteSpace(string s) => s == null || s.Trim().Length == 0;
+
+        /// <summary>
+        /// Берём просто cell.Text — без перебора sheet.MergedCells,
+        /// чтобы избежать ArgumentNullException в старых EPPlus.
+        /// </summary>
+        private static string GetCellText(ExcelWorksheet sheet, int row, int col)
+        {
+            return sheet.Cells[row, col].Text?.Trim() ?? "";
+        }
+
+        private static void SetValueRight(ExcelWorksheet sheet, int row, int startCol, int cols, string value)
+        {
+            for (int c = startCol + 1; c <= cols; c++)
+            {
+                var cell = sheet.Cells[row, c];
+                cell.Value = value;
+                Console.WriteLine($"Записано/перезаписано поле в row={row}, col={c} -> {value}");
+                return;
+            }
+            Console.WriteLine($"Нет свободной ячейки справа в строке {row}, значение '{value}' не записано.");
+        }
+
+        private static void SetValueFixedColumn(ExcelWorksheet sheet, int row, int fixedCol, string value)
+        {
+            var cell = sheet.Cells[row, fixedCol];
+            cell.Value = value;
+            Console.WriteLine($"Записано/перезаписано поле в row={row}, col={fixedCol} -> {value}");
+        }
+
+        #endregion
+
+        #region Копирование стилей, UnmergeRow, ApplyMergeSection
+
+        /// <summary>
+        /// Копируем стиль (StyleID) построчно.
+        /// </summary>
+        private static void CopyRowFormatting(ExcelWorksheet sheet, int sourceRow, int targetRow, int cols)
+        {
+            for (int c = 1; c <= cols; c++)
+            {
+                var sourceCell = sheet.Cells[sourceRow, c];
+                var targetCell = sheet.Cells[targetRow, c];
+                targetCell.StyleID = sourceCell.StyleID;
+            }
+        }
+
+        /// <summary>
+        /// "Размерживает" все ячейки, которые задевают заданную строку row.
+        /// В старых EPPlus могут быть null/empty-элементы в MergedCells => проверяем.
+        /// </summary>
+        private static void UnmergeRow(ExcelWorksheet sheet, int row)
+        {
+            var mergesToRemove = new List<string>();
+            foreach (var mergedAddress in sheet.MergedCells)
+            {
+                if (string.IsNullOrEmpty(mergedAddress))
+                    continue;
+
+                var addr = new ExcelAddress(mergedAddress);
+                if (addr.Start.Row <= row && addr.End.Row >= row)
+                {
+                    mergesToRemove.Add(mergedAddress);
+                }
+            }
+            foreach (var addr in mergesToRemove)
+            {
+                sheet.Cells[addr].Merge = false;
+            }
+        }
+
+        // 1.2
+        private static void ApplyMergeSection12(ExcelWorksheet sheet, int row)
+        {
+            UnmergeRow(sheet, row);
+            sheet.Cells[row, 1, row, 3].Merge = true;   // A..C
+            sheet.Cells[row, 4, row, 15].Merge = true;  // D..O
+        }
+
+        // 2.1
+        private static void ApplyMergeSection21(ExcelWorksheet sheet, int row)
+        {
+            UnmergeRow(sheet, row);
+            sheet.Cells[row, 1, row, 3].Merge = true;   // A..C
+            sheet.Cells[row, 6, row, 7].Merge = true;   // F..G
+            sheet.Cells[row, 9, row, 10].Merge = true;  // I..J
+        }
+
+        // 2.2
+        private static void ApplyMergeSection22(ExcelWorksheet sheet, int row)
+        {
+            UnmergeRow(sheet, row);
+            sheet.Cells[row, 2, row, 3].Merge = true;  // B..C
+            sheet.Cells[row, 6, row, 7].Merge = true;  // F..G
+            sheet.Cells[row, 9, row, 10].Merge = true; // I..J
+        }
+
+        // 2.3
+        private static void ApplyMergeSection23(ExcelWorksheet sheet, int row)
+        {
+            UnmergeRow(sheet, row);
+            sheet.Cells[row, 2, row, 5].Merge = true;   // B..E
+            sheet.Cells[row, 6, row, 15].Merge = true;  // F..O
+        }
+
+        // 3
+        private static void ApplyMergeSection3(ExcelWorksheet sheet, int row)
+        {
+            UnmergeRow(sheet, row);
+            sheet.Cells[row, 2, row, 4].Merge = true;   // B..D
+            sheet.Cells[row, 5, row, 9].Merge = true;   // E..I
+            sheet.Cells[row, 11, row, 15].Merge = true; // K..O
+        }
+
+        // 4
+        private static void ApplyMergeSection4(ExcelWorksheet sheet, int row)
+        {
+            UnmergeRow(sheet, row);
+            sheet.Cells[row, 1, row, 4].Merge = true;   // A..D
+            sheet.Cells[row, 5, row, 9].Merge = true;   // E..I
+            sheet.Cells[row, 11, row, 15].Merge = true; // K..O
+        }
+
+        #endregion
+
+        #region Поиск строки
+
+        private static int FindRowByPrefix(ExcelWorksheet sheet, int totalRows, string prefix)
+        {
+            for (int r = 1; r <= totalRows; r++)
+            {
+                string val = GetCellText(sheet, r, 1);
+                if (!IsNullOrWhiteSpace(val) && val.StartsWith(prefix))
+                {
+                    Console.WriteLine($"Найдена строка с префиксом '{prefix}': {r}");
+                    return r;
+                }
+            }
+            return 0;
+        }
+
+        #endregion
+
+        #region Методы записи динамических разделов
+
+        private static void WriteSection12(
+            ExcelWorksheet sheet,
+            int startRow,
+            string nextPrefix,
+            ref int totalRows,
+            List<SupportingDocument> documents)
+        {
+            int availableRows = 0;
+            int endRow = totalRows;
+            for (int r = startRow; r <= totalRows; r++)
+            {
+                string firstCell = GetCellText(sheet, r, 1);
+                if (!IsNullOrWhiteSpace(firstCell) && firstCell.StartsWith(nextPrefix))
+                {
+                    availableRows = r - startRow;
+                    endRow = r - 1;
+                    break;
+                }
+                if (r == totalRows)
+                    availableRows = totalRows - startRow + 1;
+            }
+
+            Console.WriteLine($"Доступно строк для 1.2: {availableRows}, требуется: {documents.Count}");
+            if (documents.Count > availableRows)
+            {
+                int rowsToAdd = documents.Count - availableRows;
+                sheet.InsertRow(endRow + 1, rowsToAdd);
+                for (int r = endRow + 1; r <= endRow + rowsToAdd; r++)
+                {
+                    CopyRowFormatting(sheet, startRow, r, sheet.Dimension.Columns);
+                    ApplyMergeSection12(sheet, r);
+                }
+                totalRows = sheet.Dimension.Rows;
+            }
+
+            for (int i = 0; i < documents.Count; i++)
+            {
+                int row = startRow + i;
+                if (row <= endRow)
+                    ApplyMergeSection12(sheet, row);
+
+                sheet.Cells[row, 1].Value = documents[i].Filename;           // A..C
+                sheet.Cells[row, 4].Value = documents[i].CodeTitleOrSummary; // D..O
+                Console.WriteLine($"[1.2] Записано: row={row}, Filename={documents[i].Filename}");
+            }
+        }
+
+        private static void WriteSection21(
+            ExcelWorksheet sheet,
+            int startRow,
+            string nextPrefix,
+            ref int totalRows,
+            List<TDDImpact> impacts)
+        {
+            int availableRows = 0;
+            int endRow = totalRows;
+            for (int r = startRow; r <= totalRows; r++)
+            {
+                string firstCell = GetCellText(sheet, r, 1);
+                if (!IsNullOrWhiteSpace(firstCell) && firstCell.StartsWith(nextPrefix))
+                {
+                    availableRows = r - startRow;
+                    endRow = r - 1;
+                    break;
+                }
+                if (r == totalRows)
+                    availableRows = totalRows - startRow + 1;
+            }
+
+            Console.WriteLine($"Доступно строк для 2.1: {availableRows}, требуется: {impacts.Count}");
+            if (impacts.Count > availableRows)
+            {
+                int rowsToAdd = impacts.Count - availableRows;
+                sheet.InsertRow(endRow + 1, rowsToAdd);
+                for (int r = endRow + 1; r <= endRow + rowsToAdd; r++)
+                {
+                    CopyRowFormatting(sheet, startRow, r, sheet.Dimension.Columns);
+                    ApplyMergeSection21(sheet, r);
+                }
+                totalRows = sheet.Dimension.Rows;
+            }
+
+            for (int i = 0; i < impacts.Count; i++)
+            {
+                int row = startRow + i;
+                if (row <= endRow)
+                    ApplyMergeSection21(sheet, row);
+
+                WriteOneImpact21(sheet, row, impacts[i]);
+            }
+        }
+
+        private static void WriteOneImpact21(ExcelWorksheet sheet, int row, TDDImpact imp)
+        {
+            sheet.Cells[row, 1].Value = imp.TDDCode;               // (A..C merged)
+            sheet.Cells[row, 4].Value = imp.Revision;              // D
+            sheet.Cells[row, 5].Value = imp.NewRevisionRequired ? "Yes" : "No"; // E
+            sheet.Cells[row, 6].Value = imp.TDDName;               // (F..G merged)
+            sheet.Cells[row, 8].Value = imp.TDDState;              // H
+            sheet.Cells[row, 9].Value = imp.ChangeDescription;     // (I..J merged)
+            sheet.Cells[row, 11].Value = imp.SafetyImpacts.NuclearSafety ? "Yes" : "No";    // K
+            sheet.Cells[row, 12].Value = imp.SafetyImpacts.FireSafety ? "Yes" : "No";       // L
+            sheet.Cells[row, 13].Value = imp.SafetyImpacts.IndustrialSafety ? "Yes" : "No"; // M
+            sheet.Cells[row, 14].Value = imp.SafetyImpacts.Environmental ? "Yes" : "No";    // N
+            sheet.Cells[row, 15].Value = imp.SafetyImpacts.Structural ? "Yes" : "No";       // O
+
+            Console.WriteLine($"[2.1] Записано: row={row}, TDDCode={imp.TDDCode}");
+        }
+
+        private static void WriteSection22(
+            ExcelWorksheet sheet,
+            int startRow,
+            string nextPrefix,
+            ref int totalRows,
+            List<TDDImpact> impacts)
+        {
+            int availableRows = 0;
+            int endRow = totalRows;
+            for (int r = startRow; r <= totalRows; r++)
+            {
+                string firstCell = GetCellText(sheet, r, 1);
+                if (!IsNullOrWhiteSpace(firstCell) && firstCell.StartsWith(nextPrefix))
+                {
+                    availableRows = r - startRow;
+                    endRow = r - 1;
+                    break;
+                }
+                if (r == totalRows)
+                    availableRows = totalRows - startRow + 1;
+            }
+
+            Console.WriteLine($"Доступно строк для 2.2: {availableRows}, требуется: {impacts.Count}");
+            if (impacts.Count > availableRows)
+            {
+                int rowsToAdd = impacts.Count - availableRows;
+                sheet.InsertRow(endRow + 1, rowsToAdd);
+                for (int r = endRow + 1; r <= endRow + rowsToAdd; r++)
+                {
+                    CopyRowFormatting(sheet, startRow, r, sheet.Dimension.Columns);
+                    ApplyMergeSection22(sheet, r);
+                }
+                totalRows = sheet.Dimension.Rows;
+            }
+
+            for (int i = 0; i < impacts.Count; i++)
+            {
+                int row = startRow + i;
+                if (row <= endRow)
+                    ApplyMergeSection22(sheet, row);
+
+                WriteOneImpact22(sheet, row, impacts[i]);
+            }
+        }
+
+        private static void WriteOneImpact22(ExcelWorksheet sheet, int row, TDDImpact imp)
+        {
+            sheet.Cells[row, 1].Value = imp.EvaluationOrganization;  // A
+            sheet.Cells[row, 2].Value = imp.TDDCode;                 // (B..C merged)
+            sheet.Cells[row, 4].Value = imp.Revision;                // D
+            sheet.Cells[row, 5].Value = imp.NewRevisionRequired ? "Yes" : "No"; // E
+            sheet.Cells[row, 6].Value = imp.TDDName;                 // (F..G merged)
+            sheet.Cells[row, 8].Value = imp.TDDState;                // H
+            sheet.Cells[row, 9].Value = imp.ChangeDescription;       // (I..J merged)
+            sheet.Cells[row, 11].Value = imp.SafetyImpacts.NuclearSafety ? "Yes" : "No";
+            sheet.Cells[row, 12].Value = imp.SafetyImpacts.FireSafety ? "Yes" : "No";
+            sheet.Cells[row, 13].Value = imp.SafetyImpacts.IndustrialSafety ? "Yes" : "No";
+            sheet.Cells[row, 14].Value = imp.SafetyImpacts.Environmental ? "Yes" : "No";
+            sheet.Cells[row, 15].Value = imp.SafetyImpacts.Structural ? "Yes" : "No";
+
+            Console.WriteLine($"[2.2] Записано: row={row}, TDDCode={imp.TDDCode}");
+        }
+
+        private static void WriteSection23(
+            ExcelWorksheet sheet,
+            int startRow,
+            string nextPrefix,
+            ref int totalRows,
+            List<SSCImpact> sscList)
+        {
+            int availableRows = 0;
+            int endRow = totalRows;
+            for (int r = startRow; r <= totalRows; r++)
+            {
+                string firstCell = GetCellText(sheet, r, 1);
+                if (!IsNullOrWhiteSpace(firstCell) && firstCell.StartsWith(nextPrefix))
+                {
+                    availableRows = r - startRow;
+                    endRow = r - 1;
+                    break;
+                }
+                if (r == totalRows)
+                    availableRows = totalRows - startRow + 1;
+            }
+
+            Console.WriteLine($"Доступно строк для 2.3: {availableRows}, требуется: {sscList.Count}");
+            if (sscList.Count > availableRows)
+            {
+                int rowsToAdd = sscList.Count - availableRows;
+                sheet.InsertRow(endRow + 1, rowsToAdd);
+                for (int r = endRow + 1; r <= endRow + rowsToAdd; r++)
+                {
+                    CopyRowFormatting(sheet, startRow, r, sheet.Dimension.Columns);
+                    ApplyMergeSection23(sheet, r);
+                }
+                totalRows = sheet.Dimension.Rows;
+            }
+
+            for (int i = 0; i < sscList.Count; i++)
+            {
+                int row = startRow + i;
+                if (row <= endRow)
+                    ApplyMergeSection23(sheet, row);
+
+                WriteOneSSC23(sheet, row, sscList[i]);
+            }
+        }
+
+        private static void WriteOneSSC23(ExcelWorksheet sheet, int row, SSCImpact ssc)
+        {
+            sheet.Cells[row, 1].Value = ssc.KKSCode;      // A
+            sheet.Cells[row, 2].Value = ssc.SSCName;      // (B..E merged)
+            sheet.Cells[row, 6].Value = ssc.ChangeDescription; // (F..O merged)
+            Console.WriteLine($"[2.3] Записано: row={row}, KKSCode={ssc.KKSCode}");
+        }
+
+        private static void WriteSection3(
+            ExcelWorksheet sheet,
+            int startRow,
+            string nextPrefix,
+            ref int totalRows,
+            List<Confirmation> list)
+        {
+            int idx = 0;
+            for (int r = startRow; r <= totalRows; r++)
+            {
+                string prefixCell = GetCellText(sheet, r, 1);
+                if (!IsNullOrWhiteSpace(prefixCell) && prefixCell.StartsWith(nextPrefix))
+                {
+                    int remain = list.Count - idx;
+                    if (remain > 0)
+                    {
+                        sheet.InsertRow(r, remain);
+                        for (int i = 0; i < remain; i++)
+                        {
+                            CopyRowFormatting(sheet, startRow, r + i, sheet.Dimension.Columns);
+                            ApplyMergeSection3(sheet, r + i);
+                            WriteOneConfirm3(sheet, r + i, list[idx + i]);
+                        }
+                        totalRows = sheet.Dimension.Rows;
+                    }
+                    break;
+                }
+
+                if (idx < list.Count)
+                {
+                    ApplyMergeSection3(sheet, r);
+                    WriteOneConfirm3(sheet, r, list[idx++]);
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+        private static void WriteOneConfirm3(ExcelWorksheet sheet, int row, Confirmation conf)
+        {
+            sheet.Cells[row, 1].Value = conf.Organization;   // A
+            sheet.Cells[row, 2].Value = conf.Position;       // (B..D merged)
+            sheet.Cells[row, 5].Value = conf.ResponsiblePerson; // (E..I merged)
+            sheet.Cells[row, 11].Value = conf.Date;             // (K..O merged)
+
+            Console.WriteLine($"[3] Записано: row={row}, Org={conf.Organization}");
+        }
+
+        private static void WriteSection4(
+            ExcelWorksheet sheet,
+            int startRow,
+            ref int totalRows,
+            List<Approval> list)
+        {
+            int idx = 0;
+            for (int r = startRow; r <= totalRows; r++)
+            {
+                string firstCell = GetCellText(sheet, r, 1);
+                if (!IsNullOrWhiteSpace(firstCell) &&
+                    firstCell.ToLower().Contains("change manager of the owner"))
+                {
+                    int remain = list.Count - idx;
+                    if (remain > 0)
+                    {
+                        sheet.InsertRow(r, remain);
+                        for (int i = 0; i < remain; i++)
+                        {
+                            CopyRowFormatting(sheet, startRow, r + i, sheet.Dimension.Columns);
+                            ApplyMergeSection4(sheet, r + i);
+                            WriteOneApproval4(sheet, r + i, list[idx + i]);
+                        }
+                        totalRows = sheet.Dimension.Rows;
+                    }
+                    break;
+                }
+
+                if (idx < list.Count)
+                {
+                    if (!string.IsNullOrEmpty(list[idx].Position) &&
+                        list[idx].Position.ToLower().Contains("change manager of the owner"))
+                    {
+                        Console.WriteLine($"[4] Пропущена запись: '{list[idx].Position}'");
+                        idx++;
+                        continue;
+                    }
+
+                    ApplyMergeSection4(sheet, r);
+                    WriteOneApproval4(sheet, r, list[idx++]);
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+        private static void WriteOneApproval4(ExcelWorksheet sheet, int row, Approval app)
+        {
+            sheet.Cells[row, 1].Value = app.Position;         // (A..D merged)
+            sheet.Cells[row, 5].Value = app.ResponsiblePerson; // (E..I merged)
+            sheet.Cells[row, 11].Value = app.Date;             // (K..O merged)
+
+            Console.WriteLine($"[4] Записано: row={row}, Pos={app.Position}");
+        }
+
+        #endregion
+
+        #region Классы-модели (без изменений)
+
+        public class ChangeRequest
+        {
+            public string ChangeRequestNo;
+            public string ContractorChangeCoordinator;
+            public string InitiatorInternalCRNo;
+            public string ChangeInitiator;
+            public string InitiatorOrganization;
+            public string DocumentationType;
+            public string Reason;
+            public string TechnicalSolutionDescription;
+
+            public List<SupportingDocument> SupportingDocuments = new List<SupportingDocument>();
+            public List<TDDImpact> InitiatorTDDImpacts = new List<TDDImpact>();
+            public List<TDDImpact> OtherTDDImpacts = new List<TDDImpact>();
+            public List<SSCImpact> AffectedSSCs = new List<SSCImpact>();
+
+            public Section24 Section24 = new Section24();
+            public Section25 Section25 = new Section25();
+
+            public List<Confirmation> Confirmations = new List<Confirmation>();
+            public List<Approval> Approvals = new List<Approval>();
+        }
+
+        public class SupportingDocument
+        {
+            public string Filename;
+            public string CodeTitleOrSummary;
+        }
+
+        public class Section24
+        {
+            public string FinalNSCCategory;
+            public bool ImpactOnSafetyClasses;
+            public bool ImpactOnDSA;
+            public string CRMethod;
+            public string EngineeringComments;
+        }
+
+        public class Section25
+        {
+            public bool ContractAffected;
+            public bool CostImpact;
+            public bool ScheduleImpact;
+            public string NonTechnicalComments;
+        }
+
+        public class Confirmation
+        {
+            public string Organization;
+            public string Position;
+            public string ResponsiblePerson;
+            public string Date;
+        }
+
+        public class Approval
+        {
+            public string Position;
+            public string ResponsiblePerson;
+            public string Date;
+        }
+
+        public class TDDImpact
+        {
+            public string EvaluationOrganization;
+            public string TDDCode;
+            public string Revision;
+            public bool NewRevisionRequired;
+            public string TDDName;
+            public string TDDState;
+            public string ChangeDescription;
+            public SafetyImpacts SafetyImpacts = new SafetyImpacts();
+        }
+
+        public class SSCImpact
+        {
+            public string KKSCode;
+            public string SSCName;
+            public string ChangeDescription;
+        }
+
+        public class SafetyImpacts
+        {
+            public bool NuclearSafety;
+            public bool FireSafety;
+            public bool IndustrialSafety;
+            public bool Environmental;
+            public bool Structural;
+        }
+
+        #endregion
+    }
+}
