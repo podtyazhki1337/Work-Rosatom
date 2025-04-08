@@ -5,8 +5,10 @@ import os
 import shutil
 import sqlite3
 from openpyxl import load_workbook
+from openpyxl.styles import Alignment
 from openpyxl.utils import get_column_letter
 import re
+from copy import copy
 
 
 def extract_comments_from_pdf(pdf_path):
@@ -139,17 +141,21 @@ def save_to_excel(all_comments, template_path, output_folder):
     with pd.ExcelWriter(output_path, engine='openpyxl', mode='a', if_sheet_exists='overlay') as writer:
         df.to_excel(writer, sheet_name=sheet_name, index=False, startrow=start_row - 1, header=False)
 
-    # Повторно загружаем книгу для применения форматирования
+    # Повторно загружаем книгу для копирования ячеек из строки 4
     book = load_workbook(output_path)
     sheet = book[sheet_name]
 
-    # Применяем форматирование из строки 4 к новым строкам (A-Q, 1-17)
+    # Копируем ячейки из строки 4 для каждой новой строки (A-Q, 1-17)
     for row in range(start_row, start_row + len(all_comments)):
         for col in range(1, 18):  # Столбцы A-Q (1-17)
             source_cell = sheet[f"{get_column_letter(col)}4"]
             target_cell = sheet[f"{get_column_letter(col)}{row}"]
+            target_cell.alignment = Alignment(wrap_text=True)
+            # Копируем стиль полностью
             if source_cell.has_style:
-                target_cell._style = source_cell._style
+                target_cell._style = copy(source_cell._style)
+            # Копируем значение из pandas-записи (оно уже есть в target_cell)
+            # Ничего не делаем с содержимым, так как pandas уже записал данные
 
     book.save(output_path)
     print(f"\nДанные сохранены в {output_path}, лист: {sheet_name}, начиная с строки {start_row}")
