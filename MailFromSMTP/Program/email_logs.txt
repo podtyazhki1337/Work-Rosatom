@@ -1,0 +1,256 @@
+[2025-03-11 13:39:11] Начало операции Insert
+Выполняется запрос: INSERT INTO ChM_Send_emails (CR_ID, [Group], Email) VALUES (@CR_ID, @Group, @Email)
+Параметры: CR_ID=2, Group=АЭП, Email=test@aep.com
+Результат: Вставлено строк - 1
+----------------------------------------
+[2025-03-11 13:39:11] Начало операции GetByCRId
+Соединение с базой открыто: Open
+Выполняется запрос: SELECT ID, CR_ID, [Group], Email FROM ChM_Send_emails WHERE CR_ID = @CR_ID
+Параметры: CR_ID=2
+Команда подготовлена, выполняется чтение...
+Результат:
+ID=0, CR_ID=2, Group=АЭП, Email=test@aep.com
+ID=0, CR_ID=2, Group=АЭП, Email=test@aep.com
+ID=0, CR_ID=2, Group=АЭП, Email=test@aep.com
+ID=0, CR_ID=2, Group=АЭП, Email=test@aep.com
+ID=0, CR_ID=2, Group=АЭП, Email=test@aep.com
+ID=0, CR_ID=2, Group=АЭП, Email=test@aep.com
+ID=0, CR_ID=2, Group=АЭП, Email=test@aep.com
+Найдено записей: 7
+----------------------------------------
+[2025-03-11 13:39:11] Начало операции Insert
+Выполняется запрос: INSERT INTO ChM_Send_emails (CR_ID, [Group], Email) VALUES (@CR_ID, @Group, @Email)
+Параметры: CR_ID=3, Group=Субподрядчик, Email=test@sub.com
+Результат: Вставлено строк - 1
+----------------------------------------
+[2025-03-11 13:39:11] Начало операции GetByCRId
+Соединение с базой открыто: Open
+Выполняется запрос: SELECT ID, CR_ID, [Group], Email FROM ChM_Send_emails WHERE CR_ID = @CR_ID
+Параметры: CR_ID=3
+Команда подготовлена, выполняется чтение...
+Результат:
+ID=0, CR_ID=3, Group=Субподрядчик, Email=test@sub.com
+ID=0, CR_ID=3, Group=Субподрядчик, Email=test@sub.com
+ID=0, CR_ID=3, Group=Субподрядчик, Email=test@sub.com
+ID=0, CR_ID=3, Group=Субподрядчик, Email=test@sub.com
+ID=0, CR_ID=3, Group=Субподрядчик, Email=test@sub.com
+Найдено записей: 5
+----------------------------------------
+[2025-03-11 13:39:11] Начало операции Update
+Выполняется запрос: UPDATE ChM_Send_emails SET CR_ID = @CR_ID, [Group] = @Group, Email = @Email WHERE ID = @ID
+Параметры: ID=0, CR_ID=3, Group=Субподрядчик, Email=updated@sub.com
+Результат: Обновлено строк - 0
+----------------------------------------
+[2025-03-11 13:39:11] Начало операции GetByCRId
+Соединение с базой открыто: Open
+Выполняется запрос: SELECT ID, CR_ID, [Group], Email FROM ChM_Send_emails WHERE CR_ID = @CR_ID
+Параметры: CR_ID=3
+Команда подготовлена, выполняется чтение...
+Результат:
+ID=0, CR_ID=3, Group=Субподрядчик, Email=test@sub.com
+ID=0, CR_ID=3, Group=Субподрядчик, Email=test@sub.com
+ID=0, CR_ID=3, Group=Субподрядчик, Email=test@sub.com
+ID=0, CR_ID=3, Group=Субподрядчик, Email=test@sub.com
+ID=0, CR_ID=3, Group=Субподрядчик, Email=test@sub.com
+Найдено записей: 5
+----------------------------------------
+[2025-03-11 13:39:11] Начало операции Insert
+Выполняется запрос: INSERT INTO ChM_Send_emails (CR_ID, [Group], Email) VALUES (@CR_ID, @Group, @Email)
+Параметры: CR_ID=4, Group=Венгерский Заказчик, Email=test@hungary.com
+Результат: Вставлено строк - 1
+----------------------------------------
+[2025-03-11 13:39:11] Начало операции GetByCRId
+Соединение с базой открыто: Open
+Выполняется запрос: SELECT ID, CR_ID, [Group], Email FROM ChM_Send_emails WHERE CR_ID = @CR_ID
+Параметры: CR_ID=4
+Команда подготовлена, выполняется чтение...
+Результат:
+ID=0, CR_ID=4, Group=Венгерский Заказчик, Email=test@hungary.com
+ID=0, CR_ID=4, Group=Венгерский Заказчик, Email=test@hungary.com
+ID=0, CR_ID=4, Group=Венгерский Заказчик, Email=test@hungary.com
+ID=0, CR_ID=4, Group=Венгерский Заказчик, Email=test@hungary.com
+Найдено записей: 4
+----------------------------------------
+[2025-03-11 13:39:11] Начало операции Delete
+Выполняется запрос: DELETE FROM ChM_Send_emails WHERE ID = @ID
+Параметры: ID=0
+Результат: Удалено строк - 0
+----------------------------------------
+[2025-03-11 13:39:11] Начало операции GetByCRId
+Соединение с базой открыто: Open
+Выполняется запрос: SELECT ID, CR_ID, [Group], Email FROM ChM_Send_emails WHERE CR_ID = @CR_ID
+Параметры: CR_ID=4
+Команда подготовлена, выполняется чтение...
+Результат:
+ID=0, CR_ID=4, Group=Венгерский Заказчик, Email=test@hungary.com
+ID=0, CR_ID=4, Group=Венгерский Заказчик, Email=test@hungary.com
+ID=0, CR_ID=4, Group=Венгерский Заказчик, Email=test@hungary.com
+ID=0, CR_ID=4, Group=Венгерский Заказчик, Email=test@hungary.com
+Найдено записей: 4
+----------------------------------------
+[2025-03-11 13:39:42] Начало операции Insert
+Выполняется запрос: INSERT INTO ChM_Send_emails (CR_ID, [Group], Email) VALUES (@CR_ID, @Group, @Email)
+Параметры: CR_ID=5, Group=АЭП, Email=asdmasdf@gams.com
+Результат: Вставлено строк - 1
+----------------------------------------
+[2025-03-11 13:39:42] Начало операции GetByCRId
+Соединение с базой открыто: Open
+Выполняется запрос: SELECT ID, CR_ID, [Group], Email FROM ChM_Send_emails WHERE CR_ID = @CR_ID
+Параметры: CR_ID=5
+Команда подготовлена, выполняется чтение...
+Результат:
+ID=0, CR_ID=5, Group=АЭП, Email=mayurovm@gmail.com
+ID=0, CR_ID=5, Group=АЭП, Email=asdmasdf@gams.com
+Найдено записей: 2
+----------------------------------------
+[2025-03-11 13:39:42] Начало отправки письма:
+Кому: mayurovm@gmail.com
+Тема: О рассмотрении и согласовании Запросов на изменения № 5
+Тело письма:
+Добрый день!
+
+Направляю Вам на рассмотрение Запрос на изменение № 5.
+Прошу Вас организовать оперативное рассмотрение и проработку указанных материалов.
+Ссылка на материалы: http://voshod/change/5
+Прошу рассмотреть и направить ОС в срок до: 
+
+С уважением, …
+[2025-03-11 13:40:03] Ошибка отправки письма на mayurovm@gmail.com: Сбой при отправке сообщения электронной почты.
+----------------------------------------
+[2025-03-11 13:40:03] Начало отправки письма:
+Кому: asdmasdf@gams.com
+Тема: О рассмотрении и согласовании Запросов на изменения № 5
+Тело письма:
+Добрый день!
+
+Направляю Вам на рассмотрение Запрос на изменение № 5.
+Прошу Вас организовать оперативное рассмотрение и проработку указанных материалов.
+Ссылка на материалы: http://voshod/change/5
+Прошу рассмотреть и направить ОС в срок до: 
+
+С уважением, …
+[2025-03-11 13:40:24] Ошибка отправки письма на asdmasdf@gams.com: Сбой при отправке сообщения электронной почты.
+----------------------------------------
+[2025-03-13 14:42:01] Начало операции Insert
+Выполняется запрос: INSERT INTO ChM_Send_emails (CR_ID, [Group], Email) VALUES (@CR_ID, @Group, @Email)
+Параметры: CR_ID=2, Group=АЭП, Email=test@aep.com
+Результат: Вставлено строк - 1
+----------------------------------------
+[2025-03-13 14:42:01] Начало операции GetByCRId
+Соединение с базой открыто: Open
+Выполняется запрос: SELECT ID, CR_ID, [Group], Email FROM ChM_Send_emails WHERE CR_ID = @CR_ID
+Параметры: CR_ID=2
+Команда подготовлена, выполняется чтение...
+Результат:
+ID=0, CR_ID=2, Group=АЭП, Email=test@aep.com
+ID=0, CR_ID=2, Group=АЭП, Email=test@aep.com
+ID=0, CR_ID=2, Group=АЭП, Email=test@aep.com
+ID=0, CR_ID=2, Group=АЭП, Email=test@aep.com
+ID=0, CR_ID=2, Group=АЭП, Email=test@aep.com
+ID=0, CR_ID=2, Group=АЭП, Email=test@aep.com
+ID=0, CR_ID=2, Group=АЭП, Email=test@aep.com
+ID=0, CR_ID=2, Group=АЭП, Email=test@aep.com
+Найдено записей: 8
+----------------------------------------
+[2025-03-13 14:42:01] Начало операции Insert
+Выполняется запрос: INSERT INTO ChM_Send_emails (CR_ID, [Group], Email) VALUES (@CR_ID, @Group, @Email)
+Параметры: CR_ID=3, Group=Субподрядчик, Email=test@sub.com
+Результат: Вставлено строк - 1
+----------------------------------------
+[2025-03-13 14:42:01] Начало операции GetByCRId
+Соединение с базой открыто: Open
+Выполняется запрос: SELECT ID, CR_ID, [Group], Email FROM ChM_Send_emails WHERE CR_ID = @CR_ID
+Параметры: CR_ID=3
+Команда подготовлена, выполняется чтение...
+Результат:
+ID=0, CR_ID=3, Group=Субподрядчик, Email=test@sub.com
+ID=0, CR_ID=3, Group=Субподрядчик, Email=test@sub.com
+ID=0, CR_ID=3, Group=Субподрядчик, Email=test@sub.com
+ID=0, CR_ID=3, Group=Субподрядчик, Email=test@sub.com
+ID=0, CR_ID=3, Group=Субподрядчик, Email=test@sub.com
+ID=0, CR_ID=3, Group=Субподрядчик, Email=test@sub.com
+Найдено записей: 6
+----------------------------------------
+[2025-03-13 14:42:01] Начало операции Update
+Выполняется запрос: UPDATE ChM_Send_emails SET CR_ID = @CR_ID, [Group] = @Group, Email = @Email WHERE ID = @ID
+Параметры: ID=0, CR_ID=3, Group=Субподрядчик, Email=updated@sub.com
+Результат: Обновлено строк - 0
+----------------------------------------
+[2025-03-13 14:42:01] Начало операции GetByCRId
+Соединение с базой открыто: Open
+Выполняется запрос: SELECT ID, CR_ID, [Group], Email FROM ChM_Send_emails WHERE CR_ID = @CR_ID
+Параметры: CR_ID=3
+Команда подготовлена, выполняется чтение...
+Результат:
+ID=0, CR_ID=3, Group=Субподрядчик, Email=test@sub.com
+ID=0, CR_ID=3, Group=Субподрядчик, Email=test@sub.com
+ID=0, CR_ID=3, Group=Субподрядчик, Email=test@sub.com
+ID=0, CR_ID=3, Group=Субподрядчик, Email=test@sub.com
+ID=0, CR_ID=3, Group=Субподрядчик, Email=test@sub.com
+ID=0, CR_ID=3, Group=Субподрядчик, Email=test@sub.com
+Найдено записей: 6
+----------------------------------------
+[2025-03-13 14:42:01] Начало операции Insert
+Выполняется запрос: INSERT INTO ChM_Send_emails (CR_ID, [Group], Email) VALUES (@CR_ID, @Group, @Email)
+Параметры: CR_ID=4, Group=Венгерский Заказчик, Email=test@hungary.com
+Результат: Вставлено строк - 1
+----------------------------------------
+[2025-03-13 14:42:01] Начало операции GetByCRId
+Соединение с базой открыто: Open
+Выполняется запрос: SELECT ID, CR_ID, [Group], Email FROM ChM_Send_emails WHERE CR_ID = @CR_ID
+Параметры: CR_ID=4
+Команда подготовлена, выполняется чтение...
+Результат:
+ID=0, CR_ID=4, Group=Венгерский Заказчик, Email=test@hungary.com
+ID=0, CR_ID=4, Group=Венгерский Заказчик, Email=test@hungary.com
+ID=0, CR_ID=4, Group=Венгерский Заказчик, Email=test@hungary.com
+ID=0, CR_ID=4, Group=Венгерский Заказчик, Email=test@hungary.com
+ID=0, CR_ID=4, Group=Венгерский Заказчик, Email=test@hungary.com
+Найдено записей: 5
+----------------------------------------
+[2025-03-13 14:42:01] Начало операции Delete
+Выполняется запрос: DELETE FROM ChM_Send_emails WHERE ID = @ID
+Параметры: ID=0
+Результат: Удалено строк - 0
+----------------------------------------
+[2025-03-13 14:42:01] Начало операции GetByCRId
+Соединение с базой открыто: Open
+Выполняется запрос: SELECT ID, CR_ID, [Group], Email FROM ChM_Send_emails WHERE CR_ID = @CR_ID
+Параметры: CR_ID=4
+Команда подготовлена, выполняется чтение...
+Результат:
+ID=0, CR_ID=4, Group=Венгерский Заказчик, Email=test@hungary.com
+ID=0, CR_ID=4, Group=Венгерский Заказчик, Email=test@hungary.com
+ID=0, CR_ID=4, Group=Венгерский Заказчик, Email=test@hungary.com
+ID=0, CR_ID=4, Group=Венгерский Заказчик, Email=test@hungary.com
+ID=0, CR_ID=4, Group=Венгерский Заказчик, Email=test@hungary.com
+Найдено записей: 5
+----------------------------------------
+[2025-03-13 14:42:30] Начало операции Insert
+Выполняется запрос: INSERT INTO ChM_Send_emails (CR_ID, [Group], Email) VALUES (@CR_ID, @Group, @Email)
+Параметры: CR_ID=1, Group=АЭП, Email=adas@asda.rr
+Результат: Вставлено строк - 1
+----------------------------------------
+[2025-03-13 14:42:30] Начало операции GetByCRId
+Соединение с базой открыто: Open
+Выполняется запрос: SELECT ID, CR_ID, [Group], Email FROM ChM_Send_emails WHERE CR_ID = @CR_ID
+Параметры: CR_ID=1
+Команда подготовлена, выполняется чтение...
+Результат:
+ID=0, CR_ID=1, Group=АЭП, Email=adas@asda.rr
+Найдено записей: 1
+----------------------------------------
+[2025-03-13 14:42:30] Начало отправки письма:
+Кому: adas@asda.rr
+Тема: О рассмотрении и согласовании Запросов на изменения № 1
+Тело письма:
+Добрый день!
+
+Направляю Вам на рассмотрение Запрос на изменение № 1.
+Прошу Вас организовать оперативное рассмотрение и проработку указанных материалов.
+Ссылка на материалы: http://voshod/change/1
+Прошу рассмотреть и направить ОС в срок до: 
+
+С уважением, …
+[2025-03-13 14:42:52] Ошибка отправки письма на adas@asda.rr: Сбой при отправке сообщения электронной почты.
+----------------------------------------
