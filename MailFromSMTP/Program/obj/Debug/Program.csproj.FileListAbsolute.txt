@@ -22,3 +22,15 @@ C:\Users\39800323\Rider project_old\ConsoleApplication1\Program\obj\Debug\Progra
 C:\Users\39800323\Rider project_old\ConsoleApplication1\Program\obj\Debug\Program.csproj.Up2Date
 C:\Users\39800323\Rider project_old\ConsoleApplication1\Program\obj\Debug\Program.exe
 C:\Users\39800323\Rider project_old\ConsoleApplication1\Program\obj\Debug\Program.pdb
+C:\Users\39800323\RiderProjects\MailFromSMTP\Program\bin\Debug\Program.exe.config
+C:\Users\39800323\RiderProjects\MailFromSMTP\Program\bin\Debug\Program.exe
+C:\Users\39800323\RiderProjects\MailFromSMTP\Program\bin\Debug\Program.pdb
+C:\Users\39800323\RiderProjects\MailFromSMTP\Program\bin\Debug\System.Data.SQLite.dll
+C:\Users\39800323\RiderProjects\MailFromSMTP\Program\bin\Debug\System.Data.SQLite.pdb
+C:\Users\39800323\RiderProjects\MailFromSMTP\Program\bin\Debug\System.Data.SQLite.xml
+C:\Users\39800323\RiderProjects\MailFromSMTP\Program\bin\Debug\System.Data.SQLite.dll.config
+C:\Users\39800323\RiderProjects\MailFromSMTP\Program\obj\Debug\Program.csproj.AssemblyReference.cache
+C:\Users\39800323\RiderProjects\MailFromSMTP\Program\obj\Debug\Program.csproj.CoreCompileInputs.cache
+C:\Users\39800323\RiderProjects\MailFromSMTP\Program\obj\Debug\Program.csproj.Up2Date
+C:\Users\39800323\RiderProjects\MailFromSMTP\Program\obj\Debug\Program.exe
+C:\Users\39800323\RiderProjects\MailFromSMTP\Program\obj\Debug\Program.pdb
