@@ -7,11 +7,10 @@ file_path = input("Введите путь к Excel-файлу: ")
 # Загрузка таблицы
 df = pd.read_excel(file_path)
 
-# Переименование первого столбца в "Признак" (чтобы было универсально)
-df = df.rename(columns={df.columns[0]: 'Признак'})
+df = df.rename(columns={df.columns[0]: 'Атрибут'})
 
 # Преобразование в длинный формат
-df_melted = df.melt(id_vars='Признак', var_name='Класс', value_name='Значение')
+df_melted = df.melt(id_vars='Атрибут', var_name='Класс', value_name='Значение')
 
 # Фильтрация только непустых значений
 df_filtered = df_melted[df_melted['Значение'].notna() & (df_melted['Значение'] != '')]
