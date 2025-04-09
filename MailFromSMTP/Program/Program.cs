@@ -553,8 +553,8 @@ namespace ChangeManagementSystem
                 body +=
                     "\n\n" +
                     "=====================================\n" +
-                    "| Approved:                         |\n" +
-                    "| Rejected:                         |\n" +
+                    "Approved:                            \n" +
+                    "Rejected:                            \n" +
                     "=====================================\n" +
                     "\n"+
                     "Инструкция для ответа на письмо:\n"+
