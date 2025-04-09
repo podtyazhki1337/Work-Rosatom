@@ -21,7 +21,7 @@ namespace ChangeManagementSystem
     }
 
     // -------------------------------------------------------------------------
-    // Репозиторий (интерфейс + две реализации: Stub и SQLite)
+    // Интерфейс + реализации репозитория (заглушка и SQLite)
     // -------------------------------------------------------------------------
     public interface IEmailRepository
     {
@@ -37,9 +37,6 @@ namespace ChangeManagementSystem
         void InsertIncomingResponse(string fromEmail, string crId, string status, string comment);
     }
 
-    /// <summary>
-    /// Заглушка репозитория (не ходит в БД)
-    /// </summary>
     public class StubEmailRepository : IEmailRepository
     {
         private readonly List<EmailRequest> _requests = new List<EmailRequest>();
@@ -79,6 +76,7 @@ namespace ChangeManagementSystem
         public int InsertLetter(string crId, string letterNumber, DateTime sentDate)
         {
             Console.WriteLine($"[StubRepository] InsertLetter called: CR_ID={crId}, LetterNumber={letterNumber}, SentDate={sentDate}");
+            // Возвращаем некий рандомный ID
             return new Random().Next(100, 999);
         }
 
@@ -98,9 +96,6 @@ namespace ChangeManagementSystem
         }
     }
 
-    /// <summary>
-    /// Реальный репозиторий для SQLite
-    /// </summary>
     public class SQLiteEmailRepository : IEmailRepository
     {
         private readonly string _connectionString;
@@ -423,7 +418,7 @@ namespace ChangeManagementSystem
 
         public void SendEmail(string to, string subject, string body)
         {
-            // В .NET 3.5 SmtpClient не IDisposable, убираем using
+            // В .NET 3.5 SmtpClient не IDisposable
             var smtp = new SmtpClient(_host, _port);
             smtp.EnableSsl = _enableSsl;
             smtp.Credentials = new NetworkCredential(_user, _password);
@@ -443,8 +438,7 @@ namespace ChangeManagementSystem
     }
 
     // -------------------------------------------------------------------------
-    // EmailService: теперь в тексте письма делаем таблицу Approved/Rejected/Comments
-    // и меняем подпись (УКИТ или CCRMD). Парсим «+» и комментарий.
+    // EmailService: "Approved:" / "Rejected:" и двуязычная инструкция
     // -------------------------------------------------------------------------
     public class EmailService
     {
@@ -462,7 +456,7 @@ namespace ChangeManagementSystem
 
             _groupTemplates = new Dictionary<string, string>
             {
-                // Для русской группы — в конце: "С уважением, УКИТ"
+                // Русские группы
                 { "Филиал АСЭ в Венгрии",
                     "Добрый день!\n\nНаправляю Вам на рассмотрение Запрос на изменение № {0}.\n" +
                     "Прошу Вас организовать оперативное рассмотрение и проработку указанных материалов.\n" +
@@ -478,7 +472,7 @@ namespace ChangeManagementSystem
                     "Прошу Вас организовать оперативное рассмотрение и проработку указанных материалов.\n" +
                     "Ссылка на материалы: {1}\nПрошу рассмотреть и направить ОС в срок до: {2}\n\nС уважением, УКИТ"
                 },
-                // Для англоязычного — "Best regards, CCRMD"
+                // Англ группа
                 { "Венгерский Заказчик",
                     "Dear Sir,\n\nI am sending you Change Request No. {0} for your information.\n" +
                     "Link to materials: {1}\n\nBest regards, CCRMD"
@@ -526,7 +520,7 @@ namespace ChangeManagementSystem
         }
 
         /// <summary>
-        /// Формирует и отправляет письма
+        /// Отправка писем со строками Approved/Rejected и инструкцией (рус/англ).
         /// </summary>
         public void SendEmailsConsole(string crId, string deadline = "")
         {
@@ -537,19 +531,14 @@ namespace ChangeManagementSystem
 
             foreach (var request in emailRequests)
             {
-                // Текстовая часть (рус/англ)
                 string template = _groupTemplates[request.Group];
                 string link = string.Format(_groupLinks[request.Group], crId);
 
-                // Тема
                 string subject = (request.Group == "Венгерский Заказчик")
                     ? string.Format("Change Request No. {0} notification", crId)
                     : string.Format("О рассмотрении и согласовании Запросов на изменения № {0}", crId);
 
-                // Формируем тело: если англ — два параметра {0}, {1}, если рус — три {0}, {1}, {2}
-                // У нас template уже содержит:
-                //   rus: "Добрый день!... {0} ... {1} ... {2} ... С уважением, УКИТ"
-                //   eng: "Dear Sir, ... {0} ... {1} ... Best regards, CCRMD"
+                // Формируем тело (англ. шаблон – 2 аргумента, русский – 3)
                 string body;
                 if (request.Group == "Венгерский Заказчик")
                 {
@@ -560,17 +549,19 @@ namespace ChangeManagementSystem
                     body = string.Format(template, crId, link, deadline);
                 }
 
-                // Добавим "таблицу" со строками Approved/Rejected/Comments
-                // Пользователь должен в одну из первых двух строк поставить "+".
-                body += "\n\n" +
+                // Добавляем «таблицу» Approved/Rejected и инструкцию (RU/EN)
+                body +=
+                    "\n\n" +
                     "=====================================\n" +
-                    "| Approved:                       |\n" +
-                    "| Rejected:                       |\n" +
-                    "| Comments:                       |\n" +
+                    "| Approved:                         |\n" +
+                    "| Rejected:                         |\n" +
                     "=====================================\n" +
-                    "Instruction / Инструкция:\n" +
-                    " - Put \"+\" in either Approved: or Rejected: / Поставьте \"+\" либо в строке Approved:, либо в Rejected:.\n" +
-                    " - In Comments: (if necessary) write a comment / В Comments: (если нужно) напишите комментарий.\n";
+                    "Поставьте \"+\" либо напишите комментарий в строке Approved,\n" +
+                    "или в Rejected укажите причину отклонения (обязательно, если отклонение).\n" +
+                    "----\n" +
+                    "Place a \"+\" or write a comment in \"Approved\",\n" +
+                    "or specify the reason for rejection in \"Rejected\" (mandatory if Rejected is chosen).\n" +
+                    "----\n";
 
                 logBuilder.AppendLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Начало отправки письма:");
                 logBuilder.AppendLine($"Кому: {request.Email}");
@@ -579,10 +570,9 @@ namespace ChangeManagementSystem
 
                 try
                 {
-                    // Отправляем через _emailSender
                     _emailSender.SendEmail(request.Email, subject, body);
 
-                    // Запись о письме (Letters), статус = 8 (отправлено)
+                    // Сохраняем письмо (letters) + статус 8
                     var letterNumber = "CR" + request.CR_ID + "_" + DateTime.Now.ToString("yyyyMMdd");
                     var sentDate = DateTime.Now;
                     int letterId = _repository.InsertLetter(request.CR_ID, letterNumber, sentDate);
@@ -612,55 +602,73 @@ namespace ChangeManagementSystem
             File.AppendAllText(_logFilePath, logBuilder.ToString());
         }
 
-        // --- Обработка входящего ответа ---
+        /// <summary>
+        /// Обработка входящего письма (Approved/Rejected).
+        /// Approved может быть просто "+", Rejected требует обязательного текста.
+        /// Если обе строки или ни одна – ошибка.
+        /// </summary>
         public void ProcessIncomingEmail(string fromAddress, string subject, string body)
         {
             string crId = ExtractCrIdFromSubject(subject);
 
-            // Ищем строку Approved:
+            // Читаем содержимое строк:
             string approvedLine = ParseFieldValue(body, "Approved:");
-            // Если содержит "+", считаем approved
-            bool isApproved = approvedLine.Contains("+");
-
-            // Ищем строку Rejected:
             string rejectedLine = ParseFieldValue(body, "Rejected:");
-            bool isRejected = rejectedLine.Contains("+");
 
-            // Comments:
-            string commentsLine = ParseFieldValue(body, "Comments:");
-            string comment = commentsLine.Trim(); // Может быть пустым
+            bool hasApproved = !IsNullOrWhiteSpace(approvedLine);
+            bool hasRejected = !IsNullOrWhiteSpace(rejectedLine);
 
-            // Логика: только одно из isApproved/isRejected может быть true
-            if (isApproved && isRejected)
+            if (hasApproved && hasRejected)
             {
-                // Оба статуса, ошибка
-                _emailSender.SendEmail(fromAddress, "Ошибка в ответе по CR " + crId,
-                    "Вы указали + и в Approved, и в Rejected.\nОставьте + только в одной строке и перешлите снова.");
+                // Заполнены обе
+                _emailSender.SendEmail(fromAddress, "Ошибка / Error with CR " + crId,
+                    "Заполнены и Approved, и Rejected. Укажите только одну строку.\n" +
+                    "Both Approved and Rejected are filled. Please fill only one line.");
                 return;
             }
-            if (!isApproved && !isRejected)
+            if (!hasApproved && !hasRejected)
             {
-                // Ни одно не выбрано
-                _emailSender.SendEmail(fromAddress, "Ошибка в ответе по CR " + crId,
-                    "Вы не указали + ни в Approved, ни в Rejected.\n" +
-                    "Поставьте + в одной строке (Approved или Rejected) и пришлите заново.");
+                // Пусты обе
+                _emailSender.SendEmail(fromAddress, "Ошибка / Error with CR " + crId,
+                    "Не заполнены ни Approved, ни Rejected.\n" +
+                    "Both Approved and Rejected are empty. Please fill exactly one.");
                 return;
             }
 
-            // Если всё ок, определяем статус
-            string finalStatus = isApproved ? "Approved" : "Rejected";
+            // Если есть Approved, считаем статус Approved. Любой текст (или просто +) - ок
+            if (hasApproved)
+            {
+                string finalStatus = "Approved";
+                string comment = approvedLine.Trim(); // Может быть "+" или текст
 
-            // Пишем в базу
-            _repository.InsertIncomingResponse(fromAddress, crId, finalStatus, comment);
+                _repository.InsertIncomingResponse(fromAddress, crId, finalStatus, comment);
+                _emailSender.SendEmail(fromAddress, "Ответ по CR " + crId + " принят / Response accepted",
+                    "Статус: Approved\nКомментарий: " + comment + "\nThank you!");
+                return;
+            }
 
-            // Подтверждение
-            _emailSender.SendEmail(fromAddress, "Ответ по CR " + crId + " принят",
-                "Статус: " + finalStatus + "\nКомментарий: " + comment + "\nСпасибо!");
+            // Иначе Rejected
+            // Но для Rejected требуется причина (не просто "+")
+            // Если пользователь поставил только "+", это недостаточно
+            string reason = rejectedLine.Trim();
+            if (reason == "+")
+            {
+                // Ошибка, нужно больше текста
+                _emailSender.SendEmail(fromAddress, "Ошибка / Error with CR " + crId,
+                    "Для отклонения требуется указать причину.\n" +
+                    "Rejected line must contain a reason, not just '+'.");
+                return;
+            }
+
+            // Всё ок, считаем Rejected
+            _repository.InsertIncomingResponse(fromAddress, crId, "Rejected", reason);
+            _emailSender.SendEmail(fromAddress, "Ответ по CR " + crId + " принят / Response accepted",
+                "Статус: Rejected\nПричина: " + reason + "\nThank you!");
         }
 
         private string ExtractCrIdFromSubject(string subject)
         {
-            // Упрощённый способ: ищем последнее число
+            // Упрощённо ищем последнее число
             string crId = "";
             var parts = subject.Split(' ');
             foreach (var part in parts)
@@ -676,11 +684,9 @@ namespace ChangeManagementSystem
 
         private string ParseFieldValue(string text, string fieldName)
         {
-            // Находим строку, начинающуюся с fieldName (например, "Approved:")
             int idx = text.IndexOf(fieldName, StringComparison.OrdinalIgnoreCase);
             if (idx < 0) return "";
 
-            // Берём остаток строки
             idx += fieldName.Length;
             int endIdx = text.IndexOf('\n', idx);
             string line;
@@ -694,7 +700,7 @@ namespace ChangeManagementSystem
     }
 
     // -------------------------------------------------------------------------
-    // Тесты для EmailService и репозитория
+    // Тесты для EmailService, показывают работу логики
     // -------------------------------------------------------------------------
     public class EmailServiceTests
     {
@@ -725,7 +731,8 @@ namespace ChangeManagementSystem
             Console.WriteLine("Тесты завершены.");
         }
 
-        // --- стандартные тесты в репозиторий и сервис ---
+        // --- Обычные тесты на репозиторий и валидацию ---
+
         private void TestValidationSuccess()
         {
             var request = new EmailRequest { CR_ID = "1", Group = "Филиал АСЭ в Венгрии", Email = "test@ase.com" };
@@ -834,22 +841,18 @@ namespace ChangeManagementSystem
         private void TestProcessIncomingEmail()
         {
             Console.WriteLine("TestProcessIncomingEmail: старт...");
-            // Сымитируем, что пользователь поставил "+" в Rejected, и Comments пусто
+            // Сымитируем входящее письмо, где пользователь заполнил Rejected и указал причину
             string from = "some.user@domain.com";
             string subject = "RE: О рассмотрении и согласовании Запросов на изменения № 123";
             string body =
-                "Approved:  \n" +
-                "Rejected: +\n" +
-                "Comments: Причина отказа\n";
+                "Approved:\n" +
+                "Rejected:  Я против\n";
 
             _service.ProcessIncomingEmail(from, subject, body);
             Console.WriteLine("TestProcessIncomingEmail: завершён.");
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Точка входа
-    // -------------------------------------------------------------------------
     class Program
     {
         static void Main(string[] args)
@@ -857,21 +860,19 @@ namespace ChangeManagementSystem
             string dbPath = @"C:\Users\39800323\RiderProjects\MailFromSMTP\Program\test1.db";
             string logFilePath = @"C:\Users\39800323\RiderProjects\MailFromSMTP\Program\email_logs.txt";
 
-            // -- Вариант 1: заглушечный репозиторий
+            // Выбираем репозиторий:
             IEmailRepository repository = new StubEmailRepository();
-            // -- Вариант 2: реальный SQLite
-            // IEmailRepository repository = new SQLiteEmailRepository(dbPath, logFilePath);
+            // Или: IEmailRepository repository = new SQLiteEmailRepository(dbPath, logFilePath);
 
-            // -- Вариант 1: заглушка для отправки писем
+            // Выбираем отправку писем:
             IEmailSender emailSender = new StubEmailSender();
-            // -- Вариант 2: реальная отправка
-            // IEmailSender emailSender = new SmtpEmailSender("smtp.mycompany.com", 25, "no-reply@mycompany.com", "password", false);
+            // Или: IEmailSender emailSender = new SmtpEmailSender("smtp.mycompany.com", 25, "user@company.com", "password", false);
 
             // Запускаем тесты
             var tests = new EmailServiceTests(repository, emailSender, logFilePath);
             tests.RunTests();
 
-            // Демонстрация ручного запроса
+            // Демонстрация ручного ввода
             Console.WriteLine("\nПример создания записи:");
             Console.WriteLine("Доступные группы: Филиал АСЭ в Венгрии, АЭП, Субподрядчик, Венгерский Заказчик");
 
@@ -889,7 +890,6 @@ namespace ChangeManagementSystem
 
             var request = new EmailRequest { CR_ID = crId, Group = group, Email = email };
 
-            // Создаём сервис
             var service = new EmailService(repository, emailSender, logFilePath);
 
             if (service.ValidateRequest(request, out string error))
