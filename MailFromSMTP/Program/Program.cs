@@ -556,11 +556,17 @@ namespace ChangeManagementSystem
                     "| Approved:                         |\n" +
                     "| Rejected:                         |\n" +
                     "=====================================\n" +
-                    "Поставьте \"+\" либо напишите комментарий в строке Approved,\n" +
-                    "или в Rejected укажите причину отклонения (обязательно, если отклонение).\n" +
+                    "\n"+
+                    "Инструкция для ответа на письмо:\n"+
+                    "При согласовании, напишите в строке \"Approved\" после двоеточия любой комментарий\n" +
+                    "\t или \n" +
+                    "при отлонении, напишите в строке \"Rejected\" после двоеточия причину отклонения (обязательно).\n" +
                     "----\n" +
-                    "Place a \"+\" or write a comment in \"Approved\",\n" +
-                    "or specify the reason for rejection in \"Rejected\" (mandatory if Rejected is chosen).\n" +
+                    "\n"+
+                    "Instruction to reply to this e-mail:\n"+
+                    "If approved, write any comment after the colon on the line \"Approved\"\n" +
+                    "\t or \n"+
+                    "If rejected, write the reason for rejection on the line \"Rejected\" after the colon (mandatory).\n" +
                     "----\n";
 
                 logBuilder.AppendLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Начало отправки письма:");
